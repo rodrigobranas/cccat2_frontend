@@ -2,6 +2,9 @@
 	<div>
 		<div class="row">
 			<div class="menu col-md-7">
+				<div v-if="error" class="alert alert-danger">
+					{{ error }}
+				</div>
 				<div class="list-group">
 					<div class="list-group-item" v-for="enrollment in enrollments" v-bind:key="enrollment.code">
 						<div class="row">
@@ -66,6 +69,7 @@ export default {
 	data() {
 		return {
 			enrollments: [],
+			error: "",
 			enrollStudentDTO: {
 			}
 		};
@@ -79,6 +83,7 @@ export default {
 			return formatter.format(value);
 		},
 		enrollStudent(enrollStudentDTO) {
+			this.error = "";
 			axios({
 				url: "http://localhost:3000/enrollments",
 				method: "post",
@@ -88,6 +93,8 @@ export default {
 				data: enrollStudentDTO
 			}).then(result => {
 				this.getEnrollments();
+			}).catch(error => {
+				this.error = error.response.data.message;
 			});
 		},
 		cancelEnrollment(getEnrollmentDTO) {
