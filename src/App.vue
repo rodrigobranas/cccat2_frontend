@@ -22,34 +22,34 @@
 				<hr/>
 				<div class="form-group">
 					<label>Nome</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.studentName"/>
 				</div>
 				<div class="form-group">
 					<label>CPF</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.studentCpf"/>
 				</div>
 				<div class="form-group">
 					<label>Data de Nascimento</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.studentBirthDate"/>
 				</div>
 				<div class="form-group">
 					<label>Nível</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.level"/>
 				</div>
 				<div class="form-group">
 					<label>Módulo</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.module"/>
 				</div>
 				<div class="form-group">
 					<label>Turma</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.classroom"/>
 				</div>
 				<div class="form-group">
 					<label>Quantidade de Parcelas</label>
-					<input type="text" class="form-control"/>
+					<input type="text" class="form-control" v-model="enrollStudentDTO.installments"/>
 				</div>
 				<br/>
-				<button class="btn btn-info btn-lg btn-block">Confirmar</button>
+				<button class="btn btn-info btn-lg btn-block" v-on:click="enrollStudent(enrollStudentDTO)">Confirmar</button>
 			</div>
 		</div>
 	</div>
@@ -67,10 +67,6 @@ export default {
 		return {
 			enrollments: [],
 			enrollStudentDTO: {
-				id: Math.floor(Math.random() * 10000),
-				date: moment().format("DD/MM/YYYY HH:mm"),
-				orderItems: [],
-				total: 0
 			}
 		};
 	},
@@ -83,23 +79,35 @@ export default {
 			return formatter.format(value);
 		},
 		enrollStudent(enrollStudentDTO) {
-			
+			axios({
+				url: "http://localhost:3000/enrollments",
+				method: "post",
+				headers: {
+					"authentication": "123456"
+				},
+				data: enrollStudentDTO
+			}).then(result => {
+				this.getEnrollments();
+			});
 		},
 		cancelEnrollment(getEnrollmentDTO) {
-			
+			console.log(getEnrollmentDTO);
+		},
+		getEnrollments() {
+			axios({
+				url: "http://localhost:3000/enrollments",
+				method: "get",
+				headers: {
+					"authentication": "123456"
+				}
+			}).then(result => {
+				const enrollments = result.data;
+				this.enrollments = enrollments;
+			});
 		}
 	},
 	created() {
-		axios({
-			url: "http://localhost:3000/enrollments",
-			method: "get",
-			headers: {
-				"authentication": "123456"
-			}
-		}).then(result => {
-			const enrollments = result.data;
-			this.enrollments = enrollments;
-		});
+		this.getEnrollments();
 	}
 };
 </script>
