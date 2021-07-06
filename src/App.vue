@@ -1,8 +1,23 @@
 <template>
 	<div>
-		<div class="row">
+		<div class="login" v-if="!token">
+			<div class="form-group">
+				<label>Username</label>
+				<input type="text" class="form-control" v-model="loginDTO.username"/>
+			</div>
+			<div class="form-group">
+				<label>Password</label>
+				<input type="password" class="form-control" v-model="loginDTO.password"/>
+			</div>
+			<button class="btn btn-info btn-lg btn-block" v-on:click="login(loginDTO)">Login</button>
+		</div>
+		<div v-if="token" class="row">
 			<div class="col-md-8">
 				<div class="main">
+					<div class="text-right">
+						<button class="btn btn-outline-info btn-sm" v-on:click="logout()">Logout</button>
+					</div>
+					<br/>
 					<div v-if="error" class="alert alert-danger">
 						<span class="fa fa-times"></span> {{ error }}
 					</div>
@@ -159,7 +174,10 @@ export default {
 		return {
 			enrollments: [],
 			error: "",
+			token: "",
 			enrollStudentDTO: {
+			},
+			loginDTO: {
 			}
 		};
 	},
@@ -247,10 +265,28 @@ export default {
 				const enrollments = result.data;
 				this.enrollments = enrollments;
 			});
+		},
+		login(loginDTO) {
+			this.error = "";
+			axios({
+				url: "http://localhost:3000/login",
+				method: "post",
+				data: loginDTO
+			}).then(result => {
+				this.token = result.data;
+				localStorage.setItem("token", result.data);
+			}).catch(error => {
+				this.error = error.response.data.message;
+			});
+		},
+		logout() {
+			localStorage.removeItem("token");
+			location.reload();
 		}
 	},
 	created() {
 		this.getEnrollments();
+		this.token = localStorage.getItem("token");
 	}
 };
 </script>
@@ -274,6 +310,13 @@ body {
 .well {
 	background-color: #F1F1F1;
 	padding: 30px;
+}
+
+.login {
+	width: 400px;
+	margin-top: 200px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 </style>

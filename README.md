@@ -1,11 +1,10 @@
-Para instalar:
+Este conteúdo é parte do curso Clean Code e Clean Architecture da Branas.io
 
-npm install em client/ e server/
+Para mais informações acesse:
 
-Para rodar o client (porta 8080):
+https://app.branas.io/clean-code-e-clean-architecture
 
-npm run serve em client/
+Instruções:
 
-Para rodar o server (porta 4000):
-
-node server em server/
+npm install
+npm run serve
