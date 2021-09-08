@@ -12,7 +12,7 @@
 			<button class="btn btn-info btn-lg btn-block" v-on:click="login(loginDTO)">Login</button>
 		</div>
 		<div v-if="token" class="row">
-			<div class="col-md-8">
+			<div class="col-md-7">
 				<div class="main">
 					<div class="text-right">
 						<button class="btn btn-outline-info btn-sm" v-on:click="logout()">Logout</button>
@@ -21,141 +21,73 @@
 					<div v-if="error" class="alert alert-danger">
 						<span class="fa fa-times"></span> {{ error }}
 					</div>
-					<div v-if="enrollments.length === 0">
-						<div class="text-center" style="padding-top: 300px;">
-							<span class="fa fa-list fa-3x text-muted"></span>
-							<br/><br/>
-							<h5>Nenhuma Matrícula</h5>
+					<div class="row">
+						<div class="col-md-4" v-for="item in items" v-bind:key="item.id">
+							<div class="card card-body text-center">
+								<h5>{{item.description}}</h5>
+								<br/>
+								<h4>{{formatMoney(item.price)}}</h4>
+								<br/>
+								<button class="btn btn-info btn-lg" v-on:click="addItem(item)">Add</button>
+							</div>
 						</div>
 					</div>
-					<div class="list-group" v-for="enrollment in enrollments" v-bind:key="enrollment.code">
-						<div class="list-group-item" >
-							<div class="row">
-								<div class="col-md-12">
-									<div class="well">
-										<div class="row">
-											<div class="col-md-4 text-center">
-												<h5>Código</h5>
-												{{ enrollment.code }}<br/>
-											</div>
-											<div class="col-md-4 text-center">
-												<h5>Aluno</h5>
-												{{ enrollment.studentName }}<br/>
-											</div>
-											<div class="col-md-4 text-center">
-												<h5>CPF</h5>
-												{{ enrollment.studentCpf}}<br/>
-											</div>
-										</div>
-										<br/>
-										<div class="row">
-											<div class="col-md-4 text-center">
-												<h5>Dt. Nascimento</h5>
-												{{ formatDate(enrollment.studentBirthDate) }}<br/>
-											</div>
-											<div class="col-md-4 text-center">
-												<h5>Nível</h5>
-												{{ enrollment.levelDescription }}<br/>
-											</div>
-											<div class="col-md-4 text-center">
-												<h5>Módulo</h5>
-												{{ enrollment.moduleDescription}}<br/>
-											</div>
-										</div>
-										<br/>
-										<div class="row">
-											<div class="col-md-4 text-center">
-												<h5>Turma</h5>
-												{{ enrollment.classroomCode}}<br/>
-											</div>
-											<div class="col-md-4 text-center">
-												<h5>Status</h5>
-												{{ translate(enrollment.status) }}<br/>
-											</div>
-											<div class="col-md-4 text-center">
-												<h5>Saldo</h5>
-												{{ formatMoney(enrollment.balance)}}<br/>
-											</div>
-										</div>
-										<br/>
-										<div class="text-center">
-											<button class="btn btn-outline-danger btn-sm" v-on:click="cancelEnrollment(enrollment)">
-												<span class="fa fa-times"></span> Cancelar Matrícula
-											</button>
-										</div>
+				</div>
+			</div>
+			<div class="col-md-5">
+				<div class="order">
+					<div v-if="!order.code">
+						<h5>Place Order</h5>
+						<hr/>
+						<div class="form-group">
+							<label>CPF</label>
+							<input type="text" class="form-control" v-model="placeOrderDTO.cpf"/>
+						</div>
+						<br/>
+						<div class="list-group" v-if="placeOrderDTO.items.length === 0">
+							<div class="list-group-item text-center">
+								There's no item
+							</div>
+						</div>
+						<div class="list-group" v-if="placeOrderDTO.items.length > 0">
+							<div class="list-group-item" v-for="item in placeOrderDTO.items" v-bind:key="item.idItem">
+								<div class="row">
+									<div class="col-md-1">
+										{{item.quantity}}
 									</div>
-									<br/>
-									<table class="table table-striped">
-										<thead>
-											<tr>
-												<th>Ciclo</th>
-												<th>Vencimento</th>
-												<th>Valor</th>
-												<th>Multa</th>
-												<th>Juros</th>
-												<th>Saldo</th>
-												<th>Status</th>
-												<th></th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr v-for="invoice in enrollment.invoices" v-bind:key="invoice.month">
-												<td>{{invoice.month}}/{{invoice.year}}</td>
-												<td>{{formatDate(invoice.dueDate)}}</td>
-												<td>{{formatMoney(invoice.amount)}}</td>
-												<td>{{formatMoney(invoice.penalty)}}</td>
-												<td>{{formatMoney(invoice.interests)}}</td>
-												<td>{{formatMoney(invoice.balance)}}</td>
-												<td>{{ translate(invoice.status) }}</td>
-												<td>
-													<button class="btn btn-outline-info btn-sm" v-on:click="payInvoice(enrollment, invoice)">
-														<span class="fa fa-dollar"></span> Pagar
-													</button>
-												</td>
-											</tr>
-										</tbody>
-									</table>									
+									<div class="col-md-6">
+										{{item.description}}
+									</div>
+									<div class="col-md-3 text-right">
+										{{formatMoney(item.price * item.quantity)}}
+									</div>
+									<div class="col-md-2 text-right">
+										<button class="btn btn-info btn-sm" v-on:click="removeItem(item)">remove</button>
+									</div>
 								</div>
 							</div>
 						</div>
 						<br/>
+						<div class="form-group">
+							<label>Coupon</label>
+							<input type="text" class="form-control" v-model="placeOrderDTO.coupon"/>
+						</div>
+						<br/>
+						<button class="btn btn-info btn-lg btn-block" v-on:click="placeOrder(placeOrderDTO)">Confirm ({{formatMoney(getTotal())}})</button>
+						<br/>
 					</div>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="enrollment">
-					<h5>Matricular Aluno</h5>
-					<hr/>
-					<div class="form-group">
-						<label>Nome</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.studentName"/>
+					<div v-if="order.code">
+						<h5>Order Success</h5>
+						<hr/>
+						<div class="list-group">
+							<div class="list-group-item">
+								Code: {{order.code}}<br/>
+								Taxes: {{formatMoney(order.taxes)}}<br/>
+								Freight: {{formatMoney(order.freight)}}<br/>
+								Amount: {{formatMoney(order.total)}}<br/>
+							</div>
+						</div>
 					</div>
-					<div class="form-group">
-						<label>CPF</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.studentCpf"/>
-					</div>
-					<div class="form-group">
-						<label>Data de Nascimento</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.studentBirthDate"/>
-					</div>
-					<div class="form-group">
-						<label>Nível</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.level"/>
-					</div>
-					<div class="form-group">
-						<label>Módulo</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.module"/>
-					</div>
-					<div class="form-group">
-						<label>Turma</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.classroom"/>
-					</div>
-					<div class="form-group">
-						<label>Quantidade de Parcelas</label>
-						<input type="text" class="form-control" v-model="enrollStudentDTO.installments"/>
-					</div>
-					<br/>
-					<button class="btn btn-info btn-lg btn-block" v-on:click="enrollStudent(enrollStudentDTO)">Confirmar</button>
 				</div>
 			</div>
 		</div>
@@ -172,13 +104,18 @@ export default {
 	name: "app",
 	data() {
 		return {
-			enrollments: [],
+			items: [],
 			error: "",
 			token: "",
-			enrollStudentDTO: {
+			placeOrderDTO: {
+				items: [],
+				issueDate: new Date(),
+				cpf: "778.278.412-36",
+				zipcode: "11.111-11"
 			},
 			loginDTO: {
-			}
+			},
+			order: {}
 		};
 	},
 	methods: {
@@ -203,67 +140,67 @@ export default {
 			};
 			return translate[value];
 		},
-		enrollStudent(enrollStudentDTO) {
+		addItem(item) {
+			const existingItem = this.placeOrderDTO.items.find(existingItem => existingItem.idItem === item.id);
+			if (existingItem) {
+				existingItem.quantity++;
+			} else {
+				this.placeOrderDTO.items.push({
+					idItem: item.id,
+					description: item.description,
+					price: item.price,
+					quantity: 1
+				});
+			}
+		},
+		removeItem(item) {
+			const existingItem = this.placeOrderDTO.items.find(existingItem => existingItem.idItem === item.idItem);
+			if (existingItem) {
+				existingItem.quantity--;
+			}
+			if (existingItem.quantity === 0) {
+				const position = this.placeOrderDTO.items.indexOf(existingItem);
+				this.placeOrderDTO.items.splice(position, 1);
+			}
+		},
+		getTotal() {
+			let total = 0;
+			for (const item of this.placeOrderDTO.items) {
+				total += item.price * item.quantity;
+			}
+			return total;
+		},
+		placeOrder(placeOrderDTO) {
 			this.error = "";
 			axios({
-				url: "http://localhost:3000/enrollments",
+				url: "http://localhost:3000/orders",
 				method: "post",
 				headers: {
 					"authentication": "123456"
 				},
-				data: enrollStudentDTO
+				data: placeOrderDTO
 			}).then(result => {
-				this.enrollStudentDTO = {};
-				this.getEnrollments();
+				this.order = result.data;
+					this.placeOrderDTO = {
+					items: [],
+					issueDate: new Date(),
+					cpf: "778.278.412-36",
+					zipcode: "11.111-11"
+				};
 			}).catch(error => {
 				this.error = error.response.data.message;
 			});
 		},
-		cancelEnrollment(getEnrollmentDTO) {
-			this.error = "";
+		getItems() {
 			axios({
-				url: `http://localhost:3000/enrollments/${getEnrollmentDTO.code}/cancel`,
-				method: "post",
-				headers: {
-					"authentication": "123456"
-				}
-			}).then(result => {
-				this.getEnrollments();
-			}).catch(error => {
-				this.error = error.response.data.message;
-			});
-		},
-		payInvoice(enrollment, invoice) {
-			this.error = "";
-			axios({
-				url: `http://localhost:3000/enrollments/${enrollment.code}/pay`,
-				method: "post",
-				headers: {
-					"authentication": "123456"
-				},
-				data: {
-					code: enrollment.code,
-					month: invoice.month,
-					year: invoice.year,
-					amount: invoice.amount + invoice.penalty + invoice.interests,
-					paymentDate: new Date()
-				}
-			}).then(result => {
-				this.getEnrollments();
-			}).catch(error => {
-				this.error = error.response.data.message;
-			});
-		},
-		getEnrollments() {
-			axios({
-				url: "http://localhost:3000/enrollments",
+				url: "http://localhost:3000/items",
 				method: "get",
 				headers: {
 					"authentication": "123456"
 				}
 			}).then(result => {
-				const enrollments = result.data;
-				this.enrollments = enrollments;
+				const items = result.data;
+				this.items = items;
 			});
 		},
 		login(loginDTO) {
@@ -285,7 +222,7 @@ export default {
 		}
 	},
 	created() {
-		this.getEnrollments();
+		this.getItems();
 		this.token = localStorage.getItem("token");
 	}
 };
@@ -301,7 +238,7 @@ body {
 	padding: 30px;
 }
 
-.enrollment {
+.order {
 	background-color: #F1F1F1;
 	padding: 30px;
 	height: 100vh;
